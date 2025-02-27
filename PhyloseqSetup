@@ -24,18 +24,18 @@ library("jsonlite")
 #library(metagMisc)
 
 #Change this to your working directory
-setwd("C:/Users/charl/Desktop/Rocky Mountain Glaciers/Datasets")
+setwd("C:/Users/charl/Desktop/pHYLOSEQ eXAMPLE")
 
 
 #Load in the OTU table. See associated file on the github repo for correct formatting
-uparse_otus <- read_csv("APG_ESV_physeq.csv")
+uparse_otus <- read_csv("example_OTU_table.csv")
 otumat <- as.matrix(uparse_otus)
 rownames(otumat) <- paste0("OTU", 1:nrow(otumat))
 colnames(otumat) <- paste0("Sample", 1:ncol(otumat))
 otumat
 
 #Load in taxonomy table. See associated file on the github repo for correct formatting
-taxonomy <- read_csv("APG_taxonomy_physeq.csv")
+taxonomy <- read_csv("example_taxonomy_table.csv")
 taxmat <- as.matrix(taxonomy)
 rownames(taxmat) <- rownames(otumat)
 colnames(taxmat) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
@@ -52,7 +52,7 @@ physeq
 sample_names(physeq)
 
 #load in your metadata for all the samples. See associated file on the github repo for correct formatting
-meta_data <- read_csv("APG_meta_physeq.csv")
+meta_data <- read_csv("example_metadata.csv")
 
 #The following lines are optional data cleaning to remove NAs and change data types
 
@@ -69,3 +69,4 @@ final_physeq = merge_phyloseq(physeq, sampledata)
 #Optional filtering function to remove taxa abundant in very low numbers.
 #Frac argument is the minimum % relative abundance to be included in the new phyloseq object
 final_filt <- phyloseq_filter_taxa_tot_fraction(final_physeq, frac = 0.001)
+
