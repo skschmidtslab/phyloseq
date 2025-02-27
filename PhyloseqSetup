@@ -1,0 +1,71 @@
+#This script will help you install phyloseq and associated packages, and import your data into a phyloseq object
+#By Charlie Oliver 
+#02.26.2025
+#charles.oliver@colorado.edu
+
+#Load in required libraries, these are not all necessary but are good to have for analyses later on. 
+library("phyloseq")
+library("tidyverse")
+library("ape")
+library("plyr")
+library("readr")
+library("microbiome")
+library("lattice")
+library("colorspace")
+library("RColorBrewer")
+library("vegan")
+library("microbiome")
+library("jsonlite")
+#Optional analysis packages with associated github repositories
+#remotes::install_github('schuyler-smith/phylosmith')
+#library(phylosmith)
+#theme_set(theme_bw())
+#remotes::install_github('vmikk/metagMisc')
+#library(metagMisc)
+
+#Change this to your working directory
+setwd("C:/Users/charl/Desktop/Rocky Mountain Glaciers/Datasets")
+
+
+#Load in the OTU table. See associated file on the github repo for correct formatting
+uparse_otus <- read_csv("APG_ESV_physeq.csv")
+otumat <- as.matrix(uparse_otus)
+rownames(otumat) <- paste0("OTU", 1:nrow(otumat))
+colnames(otumat) <- paste0("Sample", 1:ncol(otumat))
+otumat
+
+#Load in taxonomy table. See associated file on the github repo for correct formatting
+taxonomy <- read_csv("APG_taxonomy_physeq.csv")
+taxmat <- as.matrix(taxonomy)
+rownames(taxmat) <- rownames(otumat)
+colnames(taxmat) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+taxmat
+
+class(otumat)
+class(taxmat)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+TAX = tax_table(taxmat)
+OTU
+TAX
+physeq = phyloseq(OTU, TAX)
+physeq
+sample_names(physeq)
+
+#load in your metadata for all the samples. See associated file on the github repo for correct formatting
+meta_data <- read_csv("APG_meta_physeq.csv")
+
+#The following lines are optional data cleaning to remove NAs and change data types
+
+#meta_data$Dist_from_glacier_m[is.na(meta_data$Dist_from_glacier_m)] <- 0
+#meta_data$Dist_from_glacier_m = factor(meta_data$Dist_from_glacier_m)
+sampledata = sample_data(data.frame(meta_data, 
+                                    row.names=sample_names(physeq), 
+                                    stringsAsFactors=FALSE))
+
+#Here is your new phyloseq object, ready for analysis!
+ 
+final_physeq = merge_phyloseq(physeq, sampledata)
+
+#Optional filtering function to remove taxa abundant in very low numbers.
+#Frac argument is the minimum % relative abundance to be included in the new phyloseq object
+final_filt <- phyloseq_filter_taxa_tot_fraction(final_physeq, frac = 0.001)
